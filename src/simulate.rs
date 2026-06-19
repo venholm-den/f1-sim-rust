@@ -113,8 +113,8 @@ fn simulate_once(
         .enumerate()
         .map(|(idx, driver)| {
             let pace_time = (1.0 - driver.pace_score).max(0.0) * 100.0;
-            let strategy_time = (1.0 - driver.strategy_score).max(0.0)
-                * config.model.strategy_loss_seconds;
+            let strategy_time =
+                (1.0 - driver.strategy_score).max(0.0) * config.model.strategy_loss_seconds;
             let grid_time = driver.grid as f64 * config.model.grid_loss_seconds;
             let noise = normal.sample(rng);
             let dnf = rng.gen_bool(driver.dnf_probability.clamp(0.0, 1.0));
@@ -123,7 +123,11 @@ fn simulate_once(
             } else {
                 0.0
             };
-            (idx, pace_time + strategy_time + grid_time + noise + dnf_penalty, dnf)
+            (
+                idx,
+                pace_time + strategy_time + grid_time + noise + dnf_penalty,
+                dnf,
+            )
         })
         .collect();
 
@@ -204,4 +208,3 @@ mod tests {
         assert_eq!(summary[0].starts, 100);
     }
 }
-

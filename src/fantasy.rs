@@ -48,4 +48,3 @@ mod tests {
         assert_eq!(score_driver(&result, &config()), -15.0);
     }
 }
-

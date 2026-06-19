@@ -33,4 +33,3 @@ pub fn write_summary(path: impl AsRef<Path>, summary: &[DriverSummary]) -> Resul
     writer.flush()?;
     Ok(())
 }
-

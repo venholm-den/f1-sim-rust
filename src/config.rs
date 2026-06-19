@@ -42,4 +42,3 @@ impl AppConfig {
         serde_json::from_str(&raw).with_context(|| format!("failed to parse {}", path.display()))
     }
 }
-

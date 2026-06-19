@@ -23,4 +23,3 @@ impl DriverInput {
         Ok(())
     }
 }
-
