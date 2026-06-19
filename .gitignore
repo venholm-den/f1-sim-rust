@@ -1,0 +1,10 @@
+/target/
+/outputs/
+/.idea/
+/.vscode/
+*.pdb
+*.exe
+*.dll
+*.log
+.env
+

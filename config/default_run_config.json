@@ -1,0 +1,22 @@
+{
+  "run": {
+    "year": 2026,
+    "event": "latest",
+    "session": "Q",
+    "n_sims": 10000,
+    "random_seed": 42
+  },
+  "model": {
+    "race_noise_seconds": 4.5,
+    "grid_loss_seconds": 0.18,
+    "strategy_loss_seconds": 2.5,
+    "dnf_time_penalty_seconds": 900.0
+  },
+  "fantasy": {
+    "fastest_lap_bonus": 5.0,
+    "dnf_penalty": -15.0,
+    "position_gain_points_per_place": 2.0,
+    "position_loss_points_per_place": -1.0
+  }
+}
+
