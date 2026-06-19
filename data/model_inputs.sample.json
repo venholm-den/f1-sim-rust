@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0",
+  "source": "data/model_inputs.sample.json",
+  "run": {
+    "year": 2026,
+    "event": "Monaco Grand Prix",
+    "session": "Q"
+  },
+  "drivers": [
+    {
+      "driver": "VER",
+      "team": "Red Bull Racing",
+      "grid": 1,
+      "pace_score": 0.98,
+      "strategy_score": 0.93,
+      "dnf_probability": 0.035,
+      "fantasy_price": 30.0
+    },
+    {
+      "driver": "NOR",
+      "team": "McLaren",
+      "grid": 2,
+      "pace_score": 0.96,
+      "strategy_score": 0.91,
+      "dnf_probability": 0.04,
+      "fantasy_price": 28.0
+    },
+    {
+      "driver": "LEC",
+      "team": "Ferrari",
+      "grid": 3,
+      "pace_score": 0.94,
+      "strategy_score": 0.88,
+      "dnf_probability": 0.045,
+      "fantasy_price": 26.0
+    }
+  ]
+}

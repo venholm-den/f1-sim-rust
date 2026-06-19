@@ -11,6 +11,7 @@ This repo is not trying to replace the full Python `f1-sim` project. The archite
 - GitHub Actions CI for format and tests.
 - JSON run, output, and data-source configuration.
 - CSV driver input.
+- JSON model-input contract in `schemas/model_inputs.schema.json`.
 - Feature-source CSV builder for generated driver inputs.
 - OpenF1-to-driver-input builder from raw drivers, laps, and weather data.
 - Track profile CSV input for overtaking, safety-car, and red-flag context.
@@ -52,6 +53,30 @@ cargo --version
 
 ## Run
 
+Primary hybrid workflow:
+
+```powershell
+# In the Python f1-sim repo, export model-ready inputs:
+python scripts/export_rust_model_inputs.py --year 2026 --event Monaco --session Q --output outputs/rust/model_inputs.json
+
+# In this Rust repo, run the fast simulation engine:
+cargo run -- simulate --config config/default_run_config.json --model-inputs ..\f1-sim\outputs\rust\model_inputs.json --output outputs/simulation_summary.csv
+```
+
+Run with the included sample model-input JSON:
+
+```powershell
+cargo run -- simulate --config config/default_run_config.json --model-inputs data/model_inputs.sample.json
+```
+
+Run a batch of Python-exported model-input files:
+
+```powershell
+cargo run -- simulate-batch --config config/default_run_config.json --model-inputs path\to\scenario-a.json path\to\scenario-b.json --output-dir outputs/batch
+```
+
+Legacy CSV input still works:
+
 ```powershell
 cargo run -- simulate --config config/default_run_config.json --drivers data/sample_driver_inputs.csv
 ```
@@ -83,6 +108,8 @@ cargo run -- strategy --drivers data/generated_driver_inputs.csv --output output
 ```
 
 Fetch OpenF1 session metadata:
+
+The OpenF1 commands are retained as development utilities, but Python should own production F1 data collection in the hybrid plan.
 
 ```powershell
 cargo run -- fetch-openf1 --year 2024 --output-dir outputs/openf1
@@ -121,11 +148,26 @@ cargo run -- serve --summary outputs/openf1_summary.csv --strategy outputs/openf
 ## Input Files
 
 - `data/sample_driver_inputs.csv`: driver/team/grid/model scores and fantasy price inputs.
+- `data/model_inputs.sample.json`: sample of the Python-to-Rust JSON contract.
 - `data/feature_source.csv`: intermediate feature inputs used by `build-inputs`.
 - `data/track_profiles.csv`: overtaking difficulty, safety-car chance, and red-flag baseline by event.
 - `data/team_power_units.csv`: team-to-power-unit mapping by season.
 
 OpenF1 historical endpoints are queried from `https://api.openf1.org/v1` and do not require authentication for basic historical access.
+
+## Model Input Contract
+
+The primary handoff from Python to Rust is `schemas/model_inputs.schema.json`.
+
+Python exports:
+
+- run metadata: `year`, `event`, `session`
+- one row per driver
+- `pace_score` and `strategy_score` as higher-is-better `0..1` values
+- `dnf_probability` as a probability `0..1`
+- optional `fantasy_price`
+
+Rust validates the schema version before simulation.
 
 ## Snapshots
 

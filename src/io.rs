@@ -1,7 +1,7 @@
 use crate::{
     data_sources::{TeamPowerUnit, TrackProfile},
     features::FeatureSourceRow,
-    model::DriverInput,
+    model::{DriverInput, ModelInputFile},
     simulate::DriverSummary,
     strategy::StrategyCandidate,
 };
@@ -34,6 +34,12 @@ pub fn read_team_power_units(path: impl AsRef<Path>) -> Result<Vec<TeamPowerUnit
 
 pub fn read_feature_source(path: impl AsRef<Path>) -> Result<Vec<FeatureSourceRow>> {
     read_csv_rows(path, "feature source")
+}
+
+pub fn read_model_inputs(path: impl AsRef<Path>) -> Result<ModelInputFile> {
+    let model_inputs: ModelInputFile = read_json(path)?;
+    model_inputs.validate()?;
+    Ok(model_inputs)
 }
 
 pub fn write_summary(path: impl AsRef<Path>, summary: &[DriverSummary]) -> Result<()> {

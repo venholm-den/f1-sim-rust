@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/venholm-den/f1-sim-rust/schemas/model_inputs.schema.json",
+  "title": "F1 Sim Rust Model Inputs",
+  "type": "object",
+  "required": ["schema_version", "run", "drivers"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "source": {
+      "type": "string"
+    },
+    "run": {
+      "type": "object",
+      "required": ["year", "event", "session"],
+      "additionalProperties": false,
+      "properties": {
+        "year": {
+          "type": "integer",
+          "minimum": 1950
+        },
+        "event": {
+          "type": "string",
+          "minLength": 1
+        },
+        "session": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "drivers": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "required": [
+          "driver",
+          "team",
+          "grid",
+          "pace_score",
+          "strategy_score",
+          "dnf_probability"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "driver": {
+            "type": "string",
+            "minLength": 1
+          },
+          "team": {
+            "type": "string",
+            "minLength": 1
+          },
+          "grid": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 30
+          },
+          "pace_score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "strategy_score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "dnf_probability": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "fantasy_price": {
+            "type": ["number", "null"],
+            "minimum": 0
+          }
+        }
+      }
+    }
+  }
+}
+

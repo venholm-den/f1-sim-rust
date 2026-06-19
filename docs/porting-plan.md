@@ -56,6 +56,9 @@ The handoff between Python and Rust should be file/API based, not duplicated log
 - [x] GitHub Actions CI for `cargo fmt --check` and `cargo test`.
 - [x] JSON run, output, and data-source configuration.
 - [x] CSV driver input schema.
+- [x] Shared JSON model-input contract in `schemas/model_inputs.schema.json`.
+- [x] Rust `simulate --model-inputs` primary runtime path.
+- [x] Rust `simulate-batch` for many exported model-input files.
 - [x] Feature-source CSV to generated driver-input pipeline.
 - [x] OpenF1 raw data to generated driver-input pipeline.
 - [x] Track profile CSV input.
@@ -71,12 +74,11 @@ The handoff between Python and Rust should be file/API based, not duplicated log
 
 ## Next Rust Milestones
 
-1. Define a stable `model_inputs.schema.json` shared by Python and Rust.
-2. Add a Python export command in the original repo that writes Rust-ready model inputs.
-3. Add a Rust `simulate-batch` command for many scenario/config runs.
-4. Replace the temporary local dashboard with a Tauri shell and React frontend.
-5. Expose Rust simulation commands to Tauri through a thin command API.
-6. Add release packaging that bundles config, sample data, and the Tauri app.
+1. Add JSON schema validation to the Python exporter test path.
+2. Wire the Python exporter into the normal post-run workflow.
+3. Replace the temporary local dashboard with a Tauri shell and React frontend.
+4. Expose Rust simulation commands to Tauri through a thin command API.
+5. Add release packaging that bundles config, sample data, and the Tauri app.
 
 ## Deferred From Rust
 

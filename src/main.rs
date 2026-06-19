@@ -20,9 +20,13 @@ struct Cli {
 #[derive(Debug, Subcommand)]
 enum Command {
     Simulate(SimulateArgs),
+    SimulateBatch(SimulateBatchArgs),
+    #[command(hide = true)]
     BuildInputs(BuildInputsArgs),
+    #[command(hide = true)]
     BuildOpenF1Inputs(BuildOpenF1InputsArgs),
     #[command(name = "fetch-openf1")]
+    #[command(hide = true)]
     FetchOpenF1(FetchOpenF1Args),
     Strategy(StrategyArgs),
     Serve(ServeArgs),
@@ -37,7 +41,25 @@ struct SimulateArgs {
     drivers: PathBuf,
 
     #[arg(long)]
+    model_inputs: Option<PathBuf>,
+
+    #[arg(long)]
     output: Option<PathBuf>,
+
+    #[arg(long)]
+    n_sims: Option<u32>,
+}
+
+#[derive(Debug, Parser)]
+struct SimulateBatchArgs {
+    #[arg(long, default_value = "config/default_run_config.json")]
+    config: PathBuf,
+
+    #[arg(long, required = true, num_args = 1..)]
+    model_inputs: Vec<PathBuf>,
+
+    #[arg(long, default_value = "outputs/batch")]
+    output_dir: PathBuf,
 
     #[arg(long)]
     n_sims: Option<u32>,
@@ -127,10 +149,12 @@ fn main() -> Result<()> {
     match cli.command.unwrap_or(Command::Simulate(SimulateArgs {
         config: PathBuf::from("config/default_run_config.json"),
         drivers: PathBuf::from("data/sample_driver_inputs.csv"),
+        model_inputs: None,
         output: None,
         n_sims: None,
     })) {
         Command::Simulate(args) => simulate_command(args),
+        Command::SimulateBatch(args) => simulate_batch_command(args),
         Command::BuildInputs(args) => build_inputs_command(args),
         Command::BuildOpenF1Inputs(args) => build_openf1_inputs_command(args),
         Command::FetchOpenF1(args) => fetch_openf1_command(args),
@@ -152,7 +176,13 @@ fn simulate_command(args: SimulateArgs) -> Result<()> {
         config.run.n_sims = n_sims;
     }
 
-    let drivers = io::read_driver_inputs(&args.drivers)?;
+    let drivers = if let Some(model_inputs_path) = args.model_inputs {
+        let model_inputs = io::read_model_inputs(&model_inputs_path)?;
+        apply_model_input_run(&mut config, &model_inputs.run);
+        model_inputs.drivers
+    } else {
+        io::read_driver_inputs(&args.drivers)?
+    };
     let context = race_context(&config)?;
     let output = args
         .output
@@ -173,6 +203,36 @@ fn simulate_command(args: SimulateArgs) -> Result<()> {
         output.display()
     );
 
+    Ok(())
+}
+
+fn simulate_batch_command(args: SimulateBatchArgs) -> Result<()> {
+    fs::create_dir_all(&args.output_dir)?;
+    let mut completed = 0usize;
+
+    for input_path in args.model_inputs {
+        let mut config = AppConfig::from_path(&args.config)?;
+        if let Some(n_sims) = args.n_sims {
+            config.run.n_sims = n_sims;
+        }
+
+        let model_inputs = io::read_model_inputs(&input_path)?;
+        apply_model_input_run(&mut config, &model_inputs.run);
+        let context = race_context(&config)?;
+        let summary = simulate::run_monte_carlo(&model_inputs.drivers, &config, &context)?;
+        let output = args.output_dir.join(format!(
+            "{}_simulation_summary.csv",
+            scenario_slug(&model_inputs.run.event, &model_inputs.run.session)
+        ));
+        io::write_summary(output, &summary)?;
+        completed += 1;
+    }
+
+    println!(
+        "Completed {} batch simulation(s) into {}",
+        completed,
+        args.output_dir.display()
+    );
     Ok(())
 }
 
@@ -285,6 +345,27 @@ fn race_context(config: &AppConfig) -> Result<RaceContext> {
 
 fn default_summary_path(output_dir: &Path) -> PathBuf {
     output_dir.join("simulation_summary.csv")
+}
+
+fn apply_model_input_run(config: &mut AppConfig, run: &f1_sim_rust::model::ModelInputRun) {
+    config.run.year = run.year;
+    config.run.event = run.event.clone();
+    config.run.session = run.session.clone();
+}
+
+fn scenario_slug(event: &str, session: &str) -> String {
+    format!("{event}_{session}")
+        .chars()
+        .map(|ch| {
+            if ch.is_ascii_alphanumeric() {
+                ch.to_ascii_lowercase()
+            } else {
+                '_'
+            }
+        })
+        .collect::<String>()
+        .trim_matches('_')
+        .to_string()
 }
 
 fn write_prediction_snapshot(
