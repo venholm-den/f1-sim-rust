@@ -1,10 +1,15 @@
 use anyhow::{Context, Result};
 use serde::Deserialize;
-use std::{fs, path::Path};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+};
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct AppConfig {
     pub run: RunConfig,
+    pub outputs: OutputConfig,
+    pub data: DataConfig,
     pub model: ModelConfig,
     pub fantasy: FantasyConfig,
 }
@@ -16,6 +21,18 @@ pub struct RunConfig {
     pub session: String,
     pub n_sims: u32,
     pub random_seed: u64,
+    pub default_overtaking_difficulty: f64,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct OutputConfig {
+    pub output_dir: PathBuf,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct DataConfig {
+    pub track_profiles_path: PathBuf,
+    pub team_power_units_path: PathBuf,
 }
 
 #[derive(Debug, Clone, Deserialize)]

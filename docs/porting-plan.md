@@ -4,29 +4,29 @@ The Rust project should be brought up in thin, testable slices. The Python proje
 
 ## Milestone 1: Simulation Core
 
-- Driver input schema.
-- Run configuration schema.
-- Monte Carlo race simulation.
-- Finish probability, podium probability, average finish, and DNF rate.
-- Basic fantasy projection.
-- CSV summary output.
+- [x] Driver input schema.
+- [x] Run configuration schema.
+- [x] Monte Carlo race simulation.
+- [x] Finish probability, podium probability, average finish, and DNF rate.
+- [x] Basic fantasy projection.
+- [x] CSV summary output.
 
 ## Milestone 2: Input Parity
 
-- Track profile CSV.
+- [x] Track profile CSV.
 - Fantasy price CSV.
-- Team power-unit CSV.
+- [x] Team power-unit CSV.
 - FIA document index compatibility.
-- Output folder conventions matching the Python project.
+- [x] Output folder conventions matching the Python project.
 
 ## Milestone 3: Model Features
 
 - Current-session feature model.
 - Baseline race feature model.
-- Reliability model.
+- Partial reliability model from per-driver DNF probability and power-unit supplier.
 - Weather modifiers.
 - Race-control modifiers.
-- Grid logic.
+- Partial grid logic with overtaking difficulty.
 
 ## Milestone 4: Strategy and Calibration
 
@@ -40,4 +40,3 @@ The Rust project should be brought up in thin, testable slices. The Python proje
 - Decide between Tauri and local web server UI.
 - Recreate race setup, dashboard, model signals, track map, weather, strategy, data sources, and race review views.
 - Add Windows build workflow.
-

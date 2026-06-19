@@ -1,4 +1,4 @@
-use crate::{config::AppConfig, fantasy, model::DriverInput};
+use crate::{config::AppConfig, data_sources::RaceContext, fantasy, model::DriverInput};
 use anyhow::Result;
 use rand::{rngs::StdRng, Rng, SeedableRng};
 use rand_distr::{Distribution, Normal};
@@ -27,6 +27,7 @@ struct DriverAccumulator {
 pub struct DriverSummary {
     pub driver: String,
     pub team: String,
+    pub power_unit_supplier: Option<String>,
     pub starts: u32,
     pub win_probability: f64,
     pub podium_probability: f64,
@@ -37,7 +38,11 @@ pub struct DriverSummary {
     pub expected_points_per_price: Option<f64>,
 }
 
-pub fn run_monte_carlo(drivers: &[DriverInput], config: &AppConfig) -> Result<Vec<DriverSummary>> {
+pub fn run_monte_carlo(
+    drivers: &[DriverInput],
+    config: &AppConfig,
+    context: &RaceContext,
+) -> Result<Vec<DriverSummary>> {
     anyhow::ensure!(drivers.len() >= 2, "at least two drivers are required");
     for driver in drivers {
         driver.validate()?;
@@ -51,7 +56,7 @@ pub fn run_monte_carlo(drivers: &[DriverInput], config: &AppConfig) -> Result<Ve
         .collect();
 
     for _ in 0..config.run.n_sims {
-        let race = simulate_once(drivers, config, &normal, &mut rng);
+        let race = simulate_once(drivers, config, context, &normal, &mut rng);
         for result in race {
             let fantasy_points = fantasy::score_driver(&result, &config.fantasy);
             let acc = accumulators
@@ -77,6 +82,9 @@ pub fn run_monte_carlo(drivers: &[DriverInput], config: &AppConfig) -> Result<Ve
             DriverSummary {
                 driver: driver.driver.clone(),
                 team: driver.team.clone(),
+                power_unit_supplier: context
+                    .power_unit_supplier(&driver.team)
+                    .map(ToString::to_string),
                 starts: acc.starts,
                 win_probability: acc.wins as f64 / starts as f64,
                 podium_probability: acc.podiums as f64 / starts as f64,
@@ -103,9 +111,14 @@ pub fn run_monte_carlo(drivers: &[DriverInput], config: &AppConfig) -> Result<Ve
 fn simulate_once(
     drivers: &[DriverInput],
     config: &AppConfig,
+    context: &RaceContext,
     normal: &Normal<f64>,
     rng: &mut StdRng,
 ) -> Vec<DriverRaceResult> {
+    let overtaking_difficulty =
+        context.overtaking_difficulty(config.run.default_overtaking_difficulty);
+    let chaos_multiplier = context.chaos_multiplier();
+
     let mut scored: Vec<(usize, f64, bool)> = drivers
         .iter()
         .enumerate()
@@ -113,9 +126,14 @@ fn simulate_once(
             let pace_time = (1.0 - driver.pace_score).max(0.0) * 100.0;
             let strategy_time =
                 (1.0 - driver.strategy_score).max(0.0) * config.model.strategy_loss_seconds;
-            let grid_time = driver.grid as f64 * config.model.grid_loss_seconds;
-            let noise = normal.sample(rng);
-            let dnf = rng.gen_bool(driver.dnf_probability.clamp(0.0, 1.0));
+            let grid_time =
+                driver.grid as f64 * config.model.grid_loss_seconds * (1.0 + overtaking_difficulty);
+            let noise = normal.sample(rng) * chaos_multiplier;
+            let dnf_probability = (driver.dnf_probability
+                * context.power_unit_dnf_multiplier(&driver.team)
+                * chaos_multiplier.sqrt())
+            .clamp(0.0, 0.95);
+            let dnf = rng.gen_bool(dnf_probability);
             let dnf_penalty = if dnf {
                 config.model.dnf_time_penalty_seconds
             } else {
@@ -149,7 +167,11 @@ fn simulate_once(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::config::{FantasyConfig, ModelConfig, RunConfig};
+    use crate::{
+        config::{DataConfig, FantasyConfig, ModelConfig, OutputConfig, RunConfig},
+        data_sources::{RaceContext, TeamPowerUnit, TrackProfile},
+    };
+    use std::path::PathBuf;
 
     fn config() -> AppConfig {
         AppConfig {
@@ -159,6 +181,14 @@ mod tests {
                 session: "Q".to_string(),
                 n_sims: 100,
                 random_seed: 7,
+                default_overtaking_difficulty: 0.55,
+            },
+            outputs: OutputConfig {
+                output_dir: PathBuf::from("outputs"),
+            },
+            data: DataConfig {
+                track_profiles_path: PathBuf::from("data/track_profiles.csv"),
+                team_power_units_path: PathBuf::from("data/team_power_units.csv"),
             },
             model: ModelConfig {
                 race_noise_seconds: 1.0,
@@ -172,6 +202,24 @@ mod tests {
                 position_loss_points_per_place: -1.0,
             },
         }
+    }
+
+    fn context() -> RaceContext {
+        RaceContext::new(
+            "test",
+            2026,
+            vec![TrackProfile {
+                event: "test".to_string(),
+                overtaking_difficulty: 0.7,
+                safety_car_chance: 0.3,
+                red_flag_base_chance: 0.05,
+            }],
+            vec![TeamPowerUnit {
+                year: 2026,
+                team: "A".to_string(),
+                power_unit_supplier: "Mercedes".to_string(),
+            }],
+        )
     }
 
     #[test]
@@ -197,7 +245,7 @@ mod tests {
             },
         ];
 
-        let summary = run_monte_carlo(&drivers, &config()).unwrap();
+        let summary = run_monte_carlo(&drivers, &config(), &context()).unwrap();
 
         assert_eq!(summary.len(), 2);
         assert_eq!(summary[0].starts, 100);

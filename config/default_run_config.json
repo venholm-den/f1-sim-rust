@@ -4,7 +4,15 @@
     "event": "latest",
     "session": "Q",
     "n_sims": 10000,
-    "random_seed": 42
+    "random_seed": 42,
+    "default_overtaking_difficulty": 0.55
+  },
+  "outputs": {
+    "output_dir": "outputs"
+  },
+  "data": {
+    "track_profiles_path": "data/track_profiles.csv",
+    "team_power_units_path": "data/team_power_units.csv"
   },
   "model": {
     "race_noise_seconds": 4.5,

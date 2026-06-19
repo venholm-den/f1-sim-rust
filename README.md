@@ -7,10 +7,12 @@ This repo starts with the core shape of the Python `f1-sim` project: configurati
 ## Current Scope
 
 - CLI entry point.
-- JSON run configuration.
+- JSON run, output, and data-source configuration.
 - CSV driver input.
+- Track profile CSV input for overtaking, safety-car, and red-flag context.
+- Team power-unit CSV input for reliability adjustment.
 - Monte Carlo finish simulation.
-- DNF probability handling.
+- DNF probability handling with basic power-unit and track chaos modifiers.
 - Basic fantasy points projection.
 - CSV simulation summary output.
 
@@ -41,14 +43,28 @@ cargo --version
 ## Run
 
 ```powershell
-cargo run -- --config config/default_run_config.json --drivers data/sample_driver_inputs.csv --output outputs/simulation_summary.csv
+cargo run -- --config config/default_run_config.json --drivers data/sample_driver_inputs.csv
 ```
+
+By default, the summary is written to `outputs/simulation_summary.csv`.
 
 Override the simulation count:
 
 ```powershell
 cargo run -- --n-sims 50000
 ```
+
+Write to a custom path:
+
+```powershell
+cargo run -- --output outputs/custom_summary.csv
+```
+
+## Input Files
+
+- `data/sample_driver_inputs.csv`: driver/team/grid/model scores and fantasy price inputs.
+- `data/track_profiles.csv`: overtaking difficulty, safety-car chance, and red-flag baseline by event.
+- `data/team_power_units.csv`: team-to-power-unit mapping by season.
 
 ## Test
 
@@ -59,4 +75,3 @@ cargo test
 ## Relationship to the Python Project
 
 The Python repo remains the source of truth while this Rust port is brought up. The Rust version should stay honest about parity: do not claim a model feature is ported until the behavior, inputs, outputs, and tests exist here.
-
