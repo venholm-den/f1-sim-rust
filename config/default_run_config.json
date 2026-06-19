@@ -13,10 +13,8 @@
     "dnf_time_penalty_seconds": 900.0
   },
   "fantasy": {
-    "fastest_lap_bonus": 5.0,
     "dnf_penalty": -15.0,
     "position_gain_points_per_place": 2.0,
     "position_loss_points_per_place": -1.0
   }
 }
-

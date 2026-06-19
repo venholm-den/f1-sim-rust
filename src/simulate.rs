@@ -8,10 +8,8 @@ use std::collections::HashMap;
 #[derive(Debug, Clone)]
 pub struct DriverRaceResult {
     pub driver: String,
-    pub team: String,
     pub grid_position: u8,
     pub finish_position: u8,
-    pub race_time_seconds: f64,
     pub dnf: bool,
 }
 
@@ -136,14 +134,12 @@ fn simulate_once(
     scored
         .into_iter()
         .enumerate()
-        .map(|(position_idx, (driver_idx, race_time_seconds, dnf))| {
+        .map(|(position_idx, (driver_idx, _race_time_seconds, dnf))| {
             let driver = &drivers[driver_idx];
             DriverRaceResult {
                 driver: driver.driver.clone(),
-                team: driver.team.clone(),
                 grid_position: driver.grid,
                 finish_position: (position_idx + 1) as u8,
-                race_time_seconds,
                 dnf,
             }
         })
@@ -171,7 +167,6 @@ mod tests {
                 dnf_time_penalty_seconds: 900.0,
             },
             fantasy: FantasyConfig {
-                fastest_lap_bonus: 5.0,
                 dnf_penalty: -15.0,
                 position_gain_points_per_place: 2.0,
                 position_loss_points_per_place: -1.0,

@@ -27,7 +27,6 @@ mod tests {
 
     fn config() -> FantasyConfig {
         FantasyConfig {
-            fastest_lap_bonus: 5.0,
             dnf_penalty: -15.0,
             position_gain_points_per_place: 2.0,
             position_loss_points_per_place: -1.0,
@@ -38,10 +37,8 @@ mod tests {
     fn dnf_uses_penalty() {
         let result = DriverRaceResult {
             driver: "AAA".to_string(),
-            team: "Team".to_string(),
             grid_position: 4,
             finish_position: 20,
-            race_time_seconds: 900.0,
             dnf: true,
         };
 

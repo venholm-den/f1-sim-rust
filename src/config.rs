@@ -28,7 +28,6 @@ pub struct ModelConfig {
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct FantasyConfig {
-    pub fastest_lap_bonus: f64,
     pub dnf_penalty: f64,
     pub position_gain_points_per_place: f64,
     pub position_loss_points_per_place: f64,
