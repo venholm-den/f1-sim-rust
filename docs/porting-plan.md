@@ -19,6 +19,7 @@ The Rust project should be brought up in thin, testable slices. The Python proje
 - FIA document index compatibility.
 - [x] Output folder conventions matching the Python project.
 - [x] Feature-source CSV to generated driver-input pipeline.
+- [x] OpenF1 raw data to generated driver-input pipeline.
 
 ## Milestone 3: Model Features
 
@@ -29,6 +30,7 @@ The Rust project should be brought up in thin, testable slices. The Python proje
 - Race-control modifiers.
 - Partial grid logic with overtaking difficulty.
 - OpenF1 REST ingestion for sessions, drivers, laps, and weather snapshots.
+- [x] Event/session selection for OpenF1 fetches.
 
 ## Milestone 4: Strategy and Calibration
 
@@ -41,10 +43,12 @@ The Rust project should be brought up in thin, testable slices. The Python proje
 
 - Decide between Tauri and local web server UI.
 - [x] Tiny local web server dashboard for simulation summaries.
+- [x] Dashboard tabs for simulation summary, strategy candidates, and OpenF1 sessions.
 - Recreate race setup, model signals, track map, weather, strategy, data sources, and race review views.
-- Add Windows build workflow.
+- [x] Add Windows build workflow.
 
 ## Milestone 6: Repository Automation
 
 - [x] GitHub Actions CI for `cargo fmt --check` and `cargo test`.
-- Add release packaging workflow once the binary/app shape settles.
+- [x] Tag-triggered release packaging workflow for a Windows executable artifact.
+- [x] Prediction snapshots for simulation outputs and run config.

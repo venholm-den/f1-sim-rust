@@ -66,6 +66,16 @@ where
     Ok(())
 }
 
+pub fn read_json<T>(path: impl AsRef<Path>) -> Result<T>
+where
+    T: for<'de> serde::Deserialize<'de>,
+{
+    let path = path.as_ref();
+    let raw = fs::read_to_string(path)
+        .with_context(|| format!("failed to read JSON {}", path.display()))?;
+    serde_json::from_str(&raw).with_context(|| format!("failed to parse JSON {}", path.display()))
+}
+
 fn write_csv_rows<T>(path: impl AsRef<Path>, rows: &[T], label: &str) -> Result<()>
 where
     T: serde::Serialize,

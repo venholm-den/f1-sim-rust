@@ -1,7 +1,7 @@
 use crate::{data_sources::RaceContext, model::DriverInput};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct StrategyCandidate {
     pub driver: String,
     pub team: String,

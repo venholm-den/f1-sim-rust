@@ -1,11 +1,11 @@
 use anyhow::{Context, Result};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::{
     fs,
     path::{Path, PathBuf},
 };
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct AppConfig {
     pub run: RunConfig,
     pub outputs: OutputConfig,
@@ -14,7 +14,7 @@ pub struct AppConfig {
     pub fantasy: FantasyConfig,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct RunConfig {
     pub year: u16,
     pub event: String,
@@ -24,18 +24,19 @@ pub struct RunConfig {
     pub default_overtaking_difficulty: f64,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct OutputConfig {
     pub output_dir: PathBuf,
+    pub save_prediction_snapshot: bool,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct DataConfig {
     pub track_profiles_path: PathBuf,
     pub team_power_units_path: PathBuf,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ModelConfig {
     pub race_noise_seconds: f64,
     pub grid_loss_seconds: f64,
@@ -43,7 +44,7 @@ pub struct ModelConfig {
     pub dnf_time_penalty_seconds: f64,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct FantasyConfig {
     pub dnf_penalty: f64,
     pub position_gain_points_per_place: f64,

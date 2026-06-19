@@ -60,6 +60,58 @@ impl OpenF1Client {
     }
 }
 
+pub fn select_session(
+    sessions: &[OpenF1Session],
+    event: &str,
+    session: &str,
+) -> Option<OpenF1Session> {
+    let event_key = normalize(event);
+    let session_key = normalize(session);
+
+    sessions
+        .iter()
+        .filter(|candidate| {
+            event_key.is_empty()
+                || text_matches(candidate.meeting_name.as_deref(), &event_key)
+                || text_matches(candidate.country_name.as_deref(), &event_key)
+                || text_matches(candidate.circuit_short_name.as_deref(), &event_key)
+                || text_matches(candidate.location.as_deref(), &event_key)
+        })
+        .filter(|candidate| {
+            session_key.is_empty()
+                || normalize(&candidate.session_name) == session_key
+                || normalize(&candidate.session_type) == session_key
+                || session_alias(&session_key)
+                    .map(|alias| normalize(&candidate.session_name).contains(alias))
+                    .unwrap_or(false)
+        })
+        .min_by_key(|candidate| candidate.date_start.clone())
+        .cloned()
+}
+
+fn text_matches(value: Option<&str>, needle: &str) -> bool {
+    value
+        .map(|value| normalize(value).contains(needle))
+        .unwrap_or(false)
+}
+
+fn session_alias(session: &str) -> Option<&'static str> {
+    match session {
+        "q" => Some("qualifying"),
+        "r" => Some("race"),
+        "fp1" => Some("practice 1"),
+        "fp2" => Some("practice 2"),
+        "fp3" => Some("practice 3"),
+        "s" => Some("sprint"),
+        "sq" => Some("sprint qualifying"),
+        _ => None,
+    }
+}
+
+fn normalize(value: &str) -> String {
+    value.trim().to_ascii_lowercase()
+}
+
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct OpenF1Session {
     pub session_key: i64,
@@ -67,8 +119,10 @@ pub struct OpenF1Session {
     pub year: u16,
     pub session_name: String,
     pub session_type: String,
+    pub meeting_name: Option<String>,
     pub country_name: Option<String>,
     pub circuit_short_name: Option<String>,
+    pub location: Option<String>,
     pub date_start: Option<String>,
 }
 
@@ -91,9 +145,6 @@ pub struct OpenF1Lap {
     pub duration_sector_1: Option<f64>,
     pub duration_sector_2: Option<f64>,
     pub duration_sector_3: Option<f64>,
-    pub segments_sector_1: Option<Vec<i32>>,
-    pub segments_sector_2: Option<Vec<i32>>,
-    pub segments_sector_3: Option<Vec<i32>>,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]

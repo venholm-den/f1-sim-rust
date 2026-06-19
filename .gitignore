@@ -1,6 +1,7 @@
 /target/
 /outputs/
 /data/generated_driver_inputs.csv
+/data/openf1_driver_inputs.csv
 /.idea/
 /.vscode/
 *.pdb

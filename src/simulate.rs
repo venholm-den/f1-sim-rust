@@ -185,6 +185,7 @@ mod tests {
             },
             outputs: OutputConfig {
                 output_dir: PathBuf::from("outputs"),
+                save_prediction_snapshot: true,
             },
             data: DataConfig {
                 track_profiles_path: PathBuf::from("data/track_profiles.csv"),

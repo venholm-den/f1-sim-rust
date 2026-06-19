@@ -8,7 +8,8 @@
     "default_overtaking_difficulty": 0.55
   },
   "outputs": {
-    "output_dir": "outputs"
+    "output_dir": "outputs",
+    "save_prediction_snapshot": true
   },
   "data": {
     "track_profiles_path": "data/track_profiles.csv",

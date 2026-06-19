@@ -12,6 +12,7 @@ This repo starts with the core shape of the Python `f1-sim` project: configurati
 - JSON run, output, and data-source configuration.
 - CSV driver input.
 - Feature-source CSV builder for generated driver inputs.
+- OpenF1-to-driver-input builder from raw drivers, laps, and weather data.
 - Track profile CSV input for overtaking, safety-car, and red-flag context.
 - Team power-unit CSV input for reliability adjustment.
 - OpenF1 REST ingestion for sessions, drivers, laps, and weather snapshots.
@@ -20,7 +21,9 @@ This repo starts with the core shape of the Python `f1-sim` project: configurati
 - Tyre strategy candidate scoring.
 - Basic fantasy points projection.
 - CSV simulation summary output.
+- Prediction snapshots under `outputs/history/`.
 - Tiny local HTML dashboard for summary CSVs.
+- Tag-triggered Windows release binary artifact workflow.
 
 ## Planned Porting Phases
 
@@ -84,16 +87,34 @@ Fetch OpenF1 session metadata:
 cargo run -- fetch-openf1 --year 2024 --output-dir outputs/openf1
 ```
 
-Fetch OpenF1 session details when you know the `session_key`:
+Fetch OpenF1 session details by event/session:
+
+```powershell
+cargo run -- fetch-openf1 --year 2024 --event Monaco --session Q --output-dir outputs/openf1-monaco
+```
+
+Fetch OpenF1 session details when you already know the `session_key`:
 
 ```powershell
 cargo run -- fetch-openf1 --year 2024 --session-key 9574 --output-dir outputs/openf1
 ```
 
+Build driver inputs from fetched OpenF1 raw data:
+
+```powershell
+cargo run -- build-open-f1-inputs --session-key 9519 --input-dir outputs/openf1-monaco --output data/openf1_driver_inputs.csv
+```
+
+Or fetch and build in one command:
+
+```powershell
+cargo run -- build-open-f1-inputs --fetch --year 2024 --event Monaco --session Q --input-dir outputs/openf1-monaco --output data/openf1_driver_inputs.csv
+```
+
 Serve the generated summary dashboard:
 
 ```powershell
-cargo run -- serve --summary outputs/simulation_summary.csv --bind 127.0.0.1:7878
+cargo run -- serve --summary outputs/openf1_summary.csv --strategy outputs/openf1_strategy.csv --sessions outputs/openf1-monaco/sessions.json --bind 127.0.0.1:7878
 ```
 
 ## Input Files
@@ -104,6 +125,23 @@ cargo run -- serve --summary outputs/simulation_summary.csv --bind 127.0.0.1:787
 - `data/team_power_units.csv`: team-to-power-unit mapping by season.
 
 OpenF1 historical endpoints are queried from `https://api.openf1.org/v1` and do not require authentication for basic historical access.
+
+## Snapshots
+
+When `outputs.save_prediction_snapshot` is enabled in `config/default_run_config.json`, `simulate` also writes:
+
+- `outputs/history/latest_prediction_snapshot.csv`
+- `outputs/history/latest_prediction_snapshot.config.json`
+- timestamped snapshot/config pairs for each run
+
+## Release Builds
+
+Pushing a tag that starts with `v` runs the `Release Build` workflow and uploads a Windows release executable artifact:
+
+```powershell
+git tag v0.1.0-alpha.1
+git push origin v0.1.0-alpha.1
+```
 
 ## Test
 
