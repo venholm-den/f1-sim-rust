@@ -1,54 +1,90 @@
-# Rust Porting Plan
+# Hybrid Project Plan
 
-The Rust project should be brought up in thin, testable slices. The Python project remains the reference implementation until parity is proven.
+The goal is no longer to rewrite the whole Python project in Rust. The better architecture is a hybrid stack:
 
-## Milestone 1: Simulation Core
+| Project area | Best choice |
+| --- | --- |
+| F1 data collection | Python |
+| Model training | Python |
+| Race simulation prototype | Python |
+| Fast simulation engine | Rust |
+| Portable `.exe` app shell | Rust/Tauri |
+| Data reports | Python |
+| Power BI prep | Python |
+| Local network monitoring backend | Rust or Python |
+| Discord bots | Python |
+| Image/audio processing tools | Rust if performance matters |
+| Web UI frontend | React/TypeScript |
+| Desktop wrapper | Tauri/Rust |
 
-- [x] Driver input schema.
-- [x] Run configuration schema.
-- [x] Monte Carlo race simulation.
-- [x] Finish probability, podium probability, average finish, and DNF rate.
-- [x] Basic fantasy projection.
-- [x] CSV summary output.
+## What Rust Owns
 
-## Milestone 2: Input Parity
+Rust should focus on fast, portable, user-facing runtime pieces:
 
-- [x] Track profile CSV.
-- [x] Fantasy price field in driver input and generated feature input.
-- [x] Team power-unit CSV.
-- FIA document index compatibility.
-- [x] Output folder conventions matching the Python project.
+- High-throughput Monte Carlo simulation.
+- Stable typed config and input/output contracts.
+- A portable desktop app shell through Tauri.
+- Small local backend endpoints for the desktop app.
+- Release packaging and Windows executable builds.
+- Performance-sensitive utilities when Python becomes the bottleneck.
+
+## What Python Owns
+
+Python remains the source of truth for data science and reporting:
+
+- FastF1/OpenF1 data collection and cache workflows.
+- Feature engineering while the model is still changing.
+- Model training, historical calibration, and backtesting.
+- Report generation and rich data exports.
+- Power BI prep and data-shaping outputs.
+- Discord bot/report posting workflows.
+
+## Interface Contract
+
+The handoff between Python and Rust should be file/API based, not duplicated logic:
+
+- Python writes driver/model input CSV or JSON.
+- Rust reads typed inputs and runs fast simulation.
+- Rust writes simulation summaries, snapshots, and strategy candidates.
+- Python can post-process Rust outputs into reports, dashboards, Power BI files, or Discord posts.
+- The Tauri app can call Rust commands directly and shell out to Python workflows where needed.
+
+## Current Rust Status
+
+- [x] CLI entry point.
+- [x] Library crate plus CLI subcommands.
+- [x] GitHub Actions CI for `cargo fmt --check` and `cargo test`.
+- [x] JSON run, output, and data-source configuration.
+- [x] CSV driver input schema.
 - [x] Feature-source CSV to generated driver-input pipeline.
 - [x] OpenF1 raw data to generated driver-input pipeline.
-
-## Milestone 3: Model Features
-
-- Partial current-session feature model from feature-source CSV.
-- Baseline race feature model.
-- Partial reliability model from per-driver DNF probability and power-unit supplier.
-- Weather modifiers.
-- Race-control modifiers.
-- Partial grid logic with overtaking difficulty.
-- OpenF1 REST ingestion for sessions, drivers, laps, and weather snapshots.
+- [x] Track profile CSV input.
+- [x] Team power-unit CSV input.
+- [x] OpenF1 REST ingestion for sessions, drivers, laps, and weather snapshots.
 - [x] Event/session selection for OpenF1 fetches.
-
-## Milestone 4: Strategy and Calibration
-
-- Tyre inventory estimation.
-- [x] Initial candidate strategy scoring.
-- Historical same-event strategy adjustment.
-- Historical finish/DNF calibration artifacts.
-
-## Milestone 5: App and Packaging
-
-- Decide between Tauri and local web server UI.
-- [x] Tiny local web server dashboard for simulation summaries.
-- [x] Dashboard tabs for simulation summary, strategy candidates, and OpenF1 sessions.
-- Recreate race setup, model signals, track map, weather, strategy, data sources, and race review views.
-- [x] Add Windows build workflow.
-
-## Milestone 6: Repository Automation
-
-- [x] GitHub Actions CI for `cargo fmt --check` and `cargo test`.
-- [x] Tag-triggered release packaging workflow for a Windows executable artifact.
+- [x] Monte Carlo finish simulation.
+- [x] Basic fantasy points projection.
+- [x] Initial tyre strategy candidate scoring.
 - [x] Prediction snapshots for simulation outputs and run config.
+- [x] Tiny local dashboard for summary, strategy, and OpenF1 sessions.
+- [x] Tag-triggered Windows release executable artifact workflow.
+
+## Next Rust Milestones
+
+1. Define a stable `model_inputs.schema.json` shared by Python and Rust.
+2. Add a Python export command in the original repo that writes Rust-ready model inputs.
+3. Add a Rust `simulate-batch` command for many scenario/config runs.
+4. Replace the temporary local dashboard with a Tauri shell and React frontend.
+5. Expose Rust simulation commands to Tauri through a thin command API.
+6. Add release packaging that bundles config, sample data, and the Tauri app.
+
+## Deferred From Rust
+
+These should not be rebuilt in Rust unless there is a clear performance or packaging reason:
+
+- FastF1 cache/data extraction parity.
+- Historical ML model training.
+- Rich matplotlib-style report generation.
+- Discord posting.
+- Power BI shaping.
+- Rapid model experimentation.

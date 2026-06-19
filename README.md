@@ -1,8 +1,8 @@
 # F1 Sim Rust
 
-Rust port foundation for the F1 race simulation and fantasy projection toolkit.
+Rust runtime foundation for the F1 race simulation and fantasy projection toolkit.
 
-This repo starts with the core shape of the Python `f1-sim` project: configuration, driver inputs, Monte Carlo race simulation, DNF risk, tyre/strategy pressure, fantasy scoring, and CSV outputs. The first milestone is intentionally small and buildable so the model can be ported in controlled layers.
+This repo is not trying to replace the full Python `f1-sim` project. The architecture is now hybrid: Python owns data collection, model training, reporting, Power BI prep, and bots; Rust owns the fast simulation engine, portable executable/runtime layer, and future Tauri desktop shell.
 
 ## Current Scope
 
@@ -25,14 +25,15 @@ This repo starts with the core shape of the Python `f1-sim` project: configurati
 - Tiny local HTML dashboard for summary CSVs.
 - Tag-triggered Windows release binary artifact workflow.
 
-## Planned Porting Phases
+## Architecture Direction
 
-1. Core simulation parity with the Python project.
-2. Data-source layer for FastF1/OpenF1-compatible inputs.
-3. Tyre strategy model and historical same-event adjustment.
-4. Historical calibration artifacts and model-signal reporting.
-5. Local app shell, likely using Tauri or a lightweight Rust web server plus static UI.
-6. Packaging workflow for Windows portable builds.
+- Python writes model-ready inputs.
+- Rust runs fast simulation and writes typed outputs/snapshots.
+- Python can still produce rich reports, Power BI prep, and Discord posts from Rust outputs.
+- React/TypeScript should own the future UI.
+- Tauri/Rust should own the portable desktop wrapper.
+
+See [Hybrid Project Plan](docs/porting-plan.md) for the ownership split.
 
 ## Setup
 
@@ -151,4 +152,4 @@ cargo test
 
 ## Relationship to the Python Project
 
-The Python repo remains the source of truth while this Rust port is brought up. The Rust version should stay honest about parity: do not claim a model feature is ported until the behavior, inputs, outputs, and tests exist here.
+The Python repo remains the source of truth for F1 data collection, feature engineering, model training, historical calibration, reporting, Power BI prep, and Discord workflows. This Rust repo should provide a fast, typed runtime engine and portable app layer that consume Python-produced inputs.
