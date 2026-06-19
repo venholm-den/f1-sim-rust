@@ -1,5 +1,6 @@
 /target/
 /outputs/
+/data/generated_driver_inputs.csv
 /.idea/
 /.vscode/
 *.pdb
@@ -7,4 +8,3 @@
 *.dll
 *.log
 .env
-

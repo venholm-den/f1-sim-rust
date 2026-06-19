@@ -1,7 +1,9 @@
 use crate::{
     data_sources::{TeamPowerUnit, TrackProfile},
+    features::FeatureSourceRow,
     model::DriverInput,
     simulate::DriverSummary,
+    strategy::StrategyCandidate,
 };
 use anyhow::{Context, Result};
 use std::{fs, path::Path};
@@ -30,7 +32,44 @@ pub fn read_team_power_units(path: impl AsRef<Path>) -> Result<Vec<TeamPowerUnit
     read_csv_rows(path, "team power units")
 }
 
+pub fn read_feature_source(path: impl AsRef<Path>) -> Result<Vec<FeatureSourceRow>> {
+    read_csv_rows(path, "feature source")
+}
+
 pub fn write_summary(path: impl AsRef<Path>, summary: &[DriverSummary]) -> Result<()> {
+    write_csv_rows(path, summary, "summary")
+}
+
+pub fn write_driver_inputs(path: impl AsRef<Path>, drivers: &[DriverInput]) -> Result<()> {
+    write_csv_rows(path, drivers, "driver inputs")
+}
+
+pub fn write_strategy_candidates(
+    path: impl AsRef<Path>,
+    candidates: &[StrategyCandidate],
+) -> Result<()> {
+    write_csv_rows(path, candidates, "strategy candidates")
+}
+
+pub fn write_json<T>(path: impl AsRef<Path>, value: &T) -> Result<()>
+where
+    T: serde::Serialize,
+{
+    let path = path.as_ref();
+    if let Some(parent) = path.parent() {
+        fs::create_dir_all(parent)
+            .with_context(|| format!("failed to create output directory {}", parent.display()))?;
+    }
+
+    let raw = serde_json::to_string_pretty(value)?;
+    fs::write(path, raw).with_context(|| format!("failed to write JSON {}", path.display()))?;
+    Ok(())
+}
+
+fn write_csv_rows<T>(path: impl AsRef<Path>, rows: &[T], label: &str) -> Result<()>
+where
+    T: serde::Serialize,
+{
     let path = path.as_ref();
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent)
@@ -38,8 +77,8 @@ pub fn write_summary(path: impl AsRef<Path>, summary: &[DriverSummary]) -> Resul
     }
 
     let mut writer = csv::Writer::from_path(path)
-        .with_context(|| format!("failed to create summary CSV {}", path.display()))?;
-    for row in summary {
+        .with_context(|| format!("failed to create {label} CSV {}", path.display()))?;
+    for row in rows {
         writer.serialize(row)?;
     }
     writer.flush()?;

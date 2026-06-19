@@ -2,7 +2,7 @@ use crate::{config::AppConfig, data_sources::RaceContext, fantasy, model::Driver
 use anyhow::Result;
 use rand::{rngs::StdRng, Rng, SeedableRng};
 use rand_distr::{Distribution, Normal};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
@@ -23,7 +23,7 @@ struct DriverAccumulator {
     fantasy_total: f64,
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct DriverSummary {
     pub driver: String,
     pub team: String,

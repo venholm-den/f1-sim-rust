@@ -1,0 +1,12 @@
+driver,team,grid,quali_score,race_score,strategy_score,reliability_score,fantasy_price
+VER,Red Bull Racing,1,0.99,0.97,0.93,0.965,30.0
+NOR,McLaren,2,0.97,0.95,0.91,0.960,28.0
+LEC,Ferrari,3,0.96,0.92,0.88,0.955,26.0
+PIA,McLaren,4,0.94,0.93,0.90,0.960,25.0
+HAM,Ferrari,5,0.93,0.89,0.86,0.950,24.0
+RUS,Mercedes,6,0.92,0.88,0.87,0.955,23.0
+ANT,Mercedes,7,0.88,0.84,0.82,0.940,18.0
+ALO,Aston Martin,8,0.86,0.83,0.85,0.945,17.0
+TSU,Red Bull Racing,9,0.84,0.81,0.80,0.930,15.0
+SAI,Williams,10,0.83,0.80,0.82,0.940,16.0
+
